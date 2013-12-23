@@ -1,11 +1,12 @@
 # symbols
 
 - [ ] Draw target symbols
-- [ ] Rotate boards
 - [ ] Select board segments and sides
 - [ ] Place Robots
 - [ ] Select target
 - [ ] Calculate moves
+
+- [ ] Replace rotation code with lin alg
 
 a  red moon
 b  yellow moon

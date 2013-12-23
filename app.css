@@ -15,6 +15,7 @@
 
 .cell.red {
   background-color: red;
+  text: 'c';
 }
 
 .cell.blue {
@@ -28,8 +29,9 @@
 .cell.yellow {
   background-color: yellow;
 }
-.cell.yellow {
-  background-color: yellow;
+
+.cell.cosmic {
+  background-color: orange;
 }
 
 /* Odd rows (1 indexed) are between spaces */

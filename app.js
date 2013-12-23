@@ -1,4 +1,5 @@
-const SYMBOL_TABLE = {
+"use strict"
+var SYMBOL_TABLE = {
   ' ': 'space',
   'C': 'wall', // center tile (just a wall for now)
   '-': 'wall',
@@ -8,6 +9,7 @@ const SYMBOL_TABLE = {
   'b': 'yellow moon',
   'c': 'blue moon',
   'd': 'green moon',
+  'e': 'red gear',
   'f': 'yellow gear',
   'g': 'blue gear',
   'h': 'green gear',
@@ -22,6 +24,19 @@ const SYMBOL_TABLE = {
   'r': 'cosmic'
 };
 
+// Clones a 2d array
+var clone = function(arr2d) {
+  var copy_arr = [];
+
+  $.each(arr2d, function(n, row) {  // For each row
+    copy_arr[n] = [];
+    $.each(row, function(j, cell) { // For each cell
+      copy_arr[n][j] = cell;
+    });
+  });
+  return copy_arr;
+}
+
 // represents one of the four board pieces.
 // string representation should be NW (center tiles of board in bottom right corner)
 // TODO: Validate that
@@ -30,13 +45,13 @@ var Tile = function(string) {
   //-- Setup Code
   var self = this;
   // Translate string into 2d array.
-  arr = string.split('\n'); // split string into an array of lines
-  layout = [];
+  var arr = string.split('\n'); // split string into an array of lines
+  var layout = [];
   $.each(arr, function(n, row_string) {
-    row = []
+    var row = []
     // Map string input chars to space, wall, or target symbols using the symbol look up table
-    for (i = 0; i < row_string.length; i++) {
-      c = row_string.charAt(i);
+    for (var i = 0; i < row_string.length; i++) {
+      var c = row_string.charAt(i);
       row.push(SYMBOL_TABLE[c]);
     }
 
@@ -52,19 +67,21 @@ var Tile = function(string) {
   });
   self.size = layout.length;
 
-  rotate = function(lay) {
-    rot_lay = []; $.each(lay, function() { rot_lay.push([]) });
+  // returns the passed array rotated 90 degrees clockwise
+  var rotate = function(orig) {
+    // create an empty 2d array of the same size as the orig
+    var rotated = []; $.each(orig, function() { rotated.push([]); });
 
-    $.each(layout.reverse(), function(n, row) {
+    $.each(orig, function(n, row) {
       $.each(row, function(j, cell) {
-        rot_lay[n].push(cell);
+        rotated[j].unshift(cell);
       });
     });
 
-    return rot_lay;
+    return rotated;
   }
 
-  self.NW = layout
+  self.NW = clone(layout);
   self.NE = rotate(self.NW);
   self.SE = rotate(self.NE);
   self.SW = rotate(self.SE);
@@ -73,17 +90,17 @@ var Tile = function(string) {
 
 // Made of four Tiles defined clockwise starting at NE tile
 var Board = function(tile1, tile2, tile3, tile4) {
-  add_horizontal = function(left_layout, right_layout) {
-    layout = left_layout; // TODO: make sure layout is a copy, not a reference
+  var add_horizontal = function(left_layout, right_layout) {
+    var layout = clone(left_layout); // TODO: make sure layout is a copy, not a reference
 
     // For each row
     for (var i = 0; i < left_layout.length; i++) {
-      left = left_layout[i][left_layout.length-1]; // last cell of left layout
-      right = right_layout[i][0];                  // first cell of right layout
+      var left_cell = left_layout[i][left_layout.length-1]; // last cell of left layout
+      var right_cell = right_layout[i][0];                  // first cell of right layout
 
       // If left or right column has a wall along the edge the center column
       // of the combined layout should have a wall.
-      if (left == 'wall' || right == 'wall') {
+      if (left_cell == 'wall' || right_cell == 'wall') {
         layout[i][layout.length - 1] = 'wall';
       }
 
@@ -93,13 +110,13 @@ var Board = function(tile1, tile2, tile3, tile4) {
     return layout;
   }
 
-  add_vericle = function(top_layout, bottom_layout) {
-    layout = top_layout; // TODO: make sure layout is a copy, not a reference
+  var add_vericle = function(top_layout, bottom_layout) {
+    var layout = clone(top_layout); // TODO: make sure layout is a copy, not a reference
 
     // For each column
     for (var i = 0; i < top_layout.length; i++) {
-      bottom_cell = top_layout[top_layout.length - 1][i]; // i-th cell from bottom row of top layout
-      top_cell = bottom_layout[0][i];                     // i-th cell from top row of bottom layout
+      var bottom_cell = top_layout[top_layout.length - 1][i]; // i-th cell from bottom row of top layout
+      var top_cell = bottom_layout[0][i];                     // i-th cell from top row of bottom layout
 
       // If bottom or top row has a wall along the edge the center row
       // of the combined layout should have a wall.
@@ -133,14 +150,18 @@ var Board = function(tile1, tile2, tile3, tile4) {
   // Add the combined tiles 3,4 below tiles 1,2, merging the center rows
   self.layout = add_vericle(top_layout, bottom_layout);
 
-  // Check that the layout is square, and each row has the same number of cells.
-  $.each(self.layout, function(n, row) {
-    if (row.length != self.layout.length) {
-      throw("Board: board is not square");
-    }
-  });
+  console.log('top: ', top_layout[0].length, ' x ', top_layout.length);
+  console.log('bottom: ', bottom_layout[0].length, ' x ', bottom_layout.length);
+  console.log('all: ', self.layout[0].length, ' x ', self.layout.length);
 
-  self.size = layout.length;
+  // Check that the layout is square, and each row has the same number of cells.
+  //$.each(self.layout, function(n, row) {
+  //  if (row.length != self.layout.length) {
+  //    throw("Board: board is not square");
+  //  }
+  //});
+
+  self.size = self.layout.length;
 
   return self;
 }
@@ -150,7 +171,7 @@ $(function (){
   console.log('start')
 
 
-  tiles = {
+  var tiles = {
   a1: new Tile(
        "+----------------\n" +
        "|   |            \n" +
@@ -298,30 +319,41 @@ $(function (){
      )
   }
 
-  //board = new Board(tiles['a1'], tiles['b1'], tiles['c1'], tiles['d1']);
-  t_array = [tiles['a1'].NW, tiles['b1'].NE, tiles['c1'].SW, tiles['d1'].SE]
-  $.each(t_array, function(n, tile) {
+  var draw = function(layout) {
     // Draw the table
-    table = $('<div>').attr('class', 'tile')
-    $.each(tile, function(n, row) {
-      table_row = $('<div>').attr('class', 'row')
+    var table = $('<div>').attr('class', 'tile')
+    $.each(layout, function(n, row) {
+      var table_row = $('<div>').attr('class', 'row')
 
       // Each cell
       $.each(row, function(n, type) {
-        classes = 'cell ' + type
-        cell = $('<div>').attr('class', classes)
+        var classes = 'cell ' + type;
+        var cell = $('<div>').attr('class', classes);
+        console.log(type);
+        if (type == undefined)
+          cell.text('undefined');
 
-        if (c == 1) {
-          cell.attr('class', 'cell wall');
-        }
-        else if (c == 1) {
-          cell.attr('class', 'cell wall');
-        }
+        //var symbol = type.match(/(star|saturn|moon|gear|cosmic)/);
+        //if (symbol != null && symbol != undefined) {
+        //  symbol = symbol[symbol.length]; // get matched symbol
+        //  cell.text(symbol);
+        //}
+
         table_row.append(cell);
       });
       table_row.append($('<div>').attr('class', 'clear'));
       table.append(table_row);
     })
     $('body').append(table);
+  }
+
+  var tile = tiles['a1'];
+  var t_array = [tile.NW, tile.NE, tile.SE, tile.SW];
+
+  $.each(t_array, function(n, layout) {
+    //draw(layout);
   });
+
+  var board = new Board(tiles['a1'], tiles['b1'], tiles['c1'], tiles['d1']);
+  draw(board.layout);
 })

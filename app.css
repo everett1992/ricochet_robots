@@ -13,6 +13,22 @@
   float: left;
 }
 
+.cell.red {
+  background-color: red;
+}
+
+.cell.blue {
+  background-color: blue;
+}
+
+.cell.green {
+  background-color: green;
+}
+
+.cell.yellow {
+  background-color: yellow;
+}
+
 /* Odd rows (1 indexed) are between spaces */
 .row:nth-child(odd) .cell {
   height: 5px;

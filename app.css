@@ -8,14 +8,16 @@
 
 /* Default cell is 20x20 */
 .cell {
+  text-align: center;
+  font-size: 30px;
   height: 30px;
   width:  30px;
   float: left;
+  color: white;
 }
 
 .cell.red {
   background-color: red;
-  text: 'c';
 }
 
 .cell.blue {
@@ -28,6 +30,7 @@
 
 .cell.yellow {
   background-color: yellow;
+  color: black;
 }
 
 .cell.cosmic {

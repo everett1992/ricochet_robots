@@ -321,6 +321,14 @@ $(function (){
 
   var draw = function(layout) {
     // Draw the table
+    var unicode_symbols = {
+      star: '\u2605', // '★'
+      gear: '\u2699', // '⚙'
+      saturn: '\u229a', // '⊚'
+      moon: '\u263E', // '☾'
+      cosmic: '\uAA5C', // '꩜'
+      robot: '\u2603', // '☃'
+    }
     var table = $('<div>').attr('class', 'tile')
     $.each(layout, function(n, row) {
       var table_row = $('<div>').attr('class', 'row')
@@ -329,15 +337,14 @@ $(function (){
       $.each(row, function(n, type) {
         var classes = 'cell ' + type;
         var cell = $('<div>').attr('class', classes);
-        console.log(type);
         if (type == undefined)
           cell.text('undefined');
 
-        //var symbol = type.match(/(star|saturn|moon|gear|cosmic)/);
-        //if (symbol != null && symbol != undefined) {
-        //  symbol = symbol[symbol.length]; // get matched symbol
-        //  cell.text(symbol);
-        //}
+        var symbol = type.match(/(star|saturn|moon|gear|cosmic)/);
+        if (symbol != null && symbol != undefined) {
+          symbol = symbol[0]; // get matched symbol
+          cell.text(unicode_symbols[symbol]);
+        }
 
         table_row.append(cell);
       });

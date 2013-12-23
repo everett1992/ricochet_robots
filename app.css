@@ -1,9 +1,19 @@
-.tile {
+.board {
   padding: 20px;
 }
 
 .clear {
   clear: both;
+}
+
+.sideboard {
+  text-align: center;
+  font-size: 30px;
+  width:  30px;
+}
+
+.robot {
+  cursor: move;
 }
 
 /* Default cell is 20x20 */
@@ -16,24 +26,28 @@
   color: white;
 }
 
-.cell.red {
+.cell.over {
+  background-color: gray;
+}
+
+.board .red, .sideboard .red {
   background-color: red;
 }
 
-.cell.blue {
+.board .blue, .sideboard .blue {
   background-color: blue;
 }
 
-.cell.green {
+.board .green, .sideboard .green {
   background-color: green;
 }
 
-.cell.yellow {
+.board .yellow, .sideboard .yellow {
   background-color: yellow;
   color: black;
 }
 
-.cell.cosmic {
+.board .cosmic, .sideboard .cosmic {
   background-color: orange;
 }
 

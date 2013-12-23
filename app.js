@@ -150,19 +150,107 @@ var Board = function(tile1, tile2, tile3, tile4) {
   // Add the combined tiles 3,4 below tiles 1,2, merging the center rows
   self.layout = add_vericle(top_layout, bottom_layout);
 
-  console.log('top: ', top_layout[0].length, ' x ', top_layout.length);
-  console.log('bottom: ', bottom_layout[0].length, ' x ', bottom_layout.length);
-  console.log('all: ', self.layout[0].length, ' x ', self.layout.length);
-
   // Check that the layout is square, and each row has the same number of cells.
-  //$.each(self.layout, function(n, row) {
-  //  if (row.length != self.layout.length) {
-  //    throw("Board: board is not square");
-  //  }
-  //});
+  $.each(self.layout, function(n, row) {
+    if (row.length != self.layout.length) {
+      throw("Board: board is not square");
+    }
+  });
 
   self.size = self.layout.length;
 
+  return self;
+}
+
+var Game = function(board) {
+  var self = this;
+
+  var unicode_symbols = {
+    star: '\u2605', // '★'
+    gear: '\u2699', // '⚙'
+    saturn: '\u229a', // '⊚'
+    moon: '\u263E', // '☾'
+    cosmic: '\uAA5C', // '꩜'
+    robot: '\u2603', // '☃'
+  }
+
+  self.board = board;
+
+  // robots x, y positions
+  self.robots = {
+    red: {x: null, y: null},
+    green: {x: null, y: null},
+    blue: {x: null, y: null},
+    yellow: {x: null, y: null},
+  }
+
+  // target space x, y
+  self.target = {x: null, y: null};
+
+  var draw_board = function(node) {
+    // Draw the board
+    var table = $('<div>').attr('class', 'board');
+    var board = $('<div>').attr('class', 'board');
+    table.append($('<div>').attr('class', 'sideboard'));
+    table.append(board);
+    $.each(self.board.layout, function(x, row) {
+      var table_row = $('<div>').attr('class', 'row')
+
+      // Each cell
+      $.each(row, function(y, type) {
+        var classes = 'cell ' + type;
+        var cell = $('<div>')
+          .attr('class', classes)
+          .attr('data-x-pos', x)
+          .attr('data-y-pos', y);
+
+        if (type == undefined)
+          cell.text('undefined');
+
+        var symbol = type.match(/(star|saturn|moon|gear|cosmic)/);
+        if (symbol != null && symbol != undefined) {
+          symbol = symbol[0]; // get matched symbol
+          cell.text(unicode_symbols[symbol]);
+        }
+
+        table_row.append(cell);
+      });
+      table_row.append($('<div>').attr('class', 'clear'));
+      board.append(table_row);
+    })
+    node.append(table);
+  }
+
+  var draw_robots = function (node) {
+    $.each(self.robots, function(name, position) {
+      var robot = $('<span>')
+          .text(unicode_symbols['robot'])
+          .attr('class', 'robot ' + name)
+          .attr('draggable', true);
+
+      if (position.x != null && position.y != null) {
+        node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']')[0].append(robot);
+      } else {
+        node.find('.sideboard').append(robot);
+      }
+    });
+  }
+
+  var add_event_listners = function(node) {
+    node.find('.cell').bind('dragenter', function(e) {
+      console.log('over');
+      this.classList.add('over');
+    });
+    node.find('.cell').bind('dragleave', function(e) {
+      this.classList.remove('over');
+    });
+  }
+
+  self.draw = function(node) {
+    draw_board(node);
+    draw_robots(node);
+    add_event_listners(node);
+  }
   return self;
 }
 
@@ -319,48 +407,7 @@ $(function (){
      )
   }
 
-  var draw = function(layout) {
-    // Draw the table
-    var unicode_symbols = {
-      star: '\u2605', // '★'
-      gear: '\u2699', // '⚙'
-      saturn: '\u229a', // '⊚'
-      moon: '\u263E', // '☾'
-      cosmic: '\uAA5C', // '꩜'
-      robot: '\u2603', // '☃'
-    }
-    var table = $('<div>').attr('class', 'tile')
-    $.each(layout, function(n, row) {
-      var table_row = $('<div>').attr('class', 'row')
-
-      // Each cell
-      $.each(row, function(n, type) {
-        var classes = 'cell ' + type;
-        var cell = $('<div>').attr('class', classes);
-        if (type == undefined)
-          cell.text('undefined');
-
-        var symbol = type.match(/(star|saturn|moon|gear|cosmic)/);
-        if (symbol != null && symbol != undefined) {
-          symbol = symbol[0]; // get matched symbol
-          cell.text(unicode_symbols[symbol]);
-        }
-
-        table_row.append(cell);
-      });
-      table_row.append($('<div>').attr('class', 'clear'));
-      table.append(table_row);
-    })
-    $('body').append(table);
-  }
-
-  var tile = tiles['a1'];
-  var t_array = [tile.NW, tile.NE, tile.SE, tile.SW];
-
-  $.each(t_array, function(n, layout) {
-    //draw(layout);
-  });
-
   var board = new Board(tiles['a1'], tiles['b1'], tiles['c1'], tiles['d1']);
-  draw(board.layout);
-})
+  var game = new Game(board);
+  game.draw($('body'));
+});

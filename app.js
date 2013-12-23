@@ -21,28 +21,68 @@ const SYMBOL_TABLE = {
   'r': 'cosmic'
 };
 
+// represents one of the four board pieces.
+// string representation should be NW (center tiles of board in bottom right corner)
+// TODO: Validate that
 var Tile = function(string) {
 
   //-- Setup Code
-  self = this;
-  self.string = string;
-
+  var self = this;
   // Translate string into 2d array.
-  arr = self.string.split('\n'); // split string into an array of lines
-  self.layout = [];
-  $.each(arr, function(row_string) {
-    row_string = arr[row_string]; // get row
+  arr = string.split('\n'); // split string into an array of lines
+  layout = [];
+  $.each(arr, function(n, row_string) {
     row = []
     // Map string input chars to space, wall, or target symbols using the symbol look up table
     for (i = 0; i < row_string.length; i++) {
       c = row_string.charAt(i);
       row.push(SYMBOL_TABLE[c]);
     }
-    self.layout.push(row);
-  })
+
+   layout.push(row);
+  });
+
+  // Check that input was valid
+  $.each(layout, function(n, row) {
+    if (row.length != layout.length) {
+      throw("Tile: Input string is now square");
+    }
+  });
+
+  rotate = function(lay) {
+    rot_lay = [];
+    // Create 2d array rot_lay with same number of columns as lay
+    // FIXME: is this ok?
+    $.each(lay, function() { rot_lay.push([]) });
+    $.each(layout.reverse(), function(n, row) {
+      $.each(row, function(j, cell) {
+        rot_lay[n].push(cell);
+      });
+    });
+
+    return rot_lay;
+  }
+
+  self.NWlayout = layout
+  self.NElayout = rotate(self.NWlayout);
+  self.SElayout = rotate(self.NElayout);
+  self.SWlayout = rotate(self.SElayout);
+  return self;
+}
+
+// Made of four Tiles defined clockwise starting at NE tile
+var Board = function(NEtile, SEtile, SWtile, NWtile) {
+  //-- Setup Code
+  var self = this;
+  self.NEtile = NEtile;
+  self.SEtile = SEtile;
+  self.SWtile = SWtile;
+  self.NWtile = NWtile;
 
   return self;
 }
+
+
 $(function (){
   console.log('start')
 
@@ -195,16 +235,13 @@ $(function (){
      )
   }
 
-  $.each(tiles, function(tile) {
+  $.each(tiles, function(n, tile) {
     table = $('<div>').attr('class', 'tile')
-    tile = tiles[tile];
-    $.each(tile.layout, function(row) {
-      row = tile.layout[row]
+    $.each(tile.NWlayout, function(n, row) {
       table_row = $('<div>').attr('class', 'row')
 
       // Each charecter
-      $.each(row, function(idx) {
-        type = row[idx]
+      $.each(row, function(n, type) {
         classes = 'cell ' + type
         cell = $('<div>').attr('class', classes)
 

@@ -1,10 +1,15 @@
 # symbols
 
+There are 377,993,952,000 unique board positions
+96 boards, 252 spaces, 4 robots. (96 * 252 * 251 * 250 * 249)
+93,742,500,096,000 with the silver robot. (above * 248)
+
 - [ ] Draw target symbols
 - [ ] Select board segments and sides
 - [ ] Place Robots
 - [ ] Select target
 - [ ] Calculate moves
+- [ ] Calculate the most moves it could take to solve a situation
 
 - [ ] Replace rotation code with lin alg
 

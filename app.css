@@ -28,6 +28,9 @@
 .cell.yellow {
   background-color: yellow;
 }
+.cell.yellow {
+  background-color: yellow;
+}
 
 /* Odd rows (1 indexed) are between spaces */
 .row:nth-child(odd) .cell {
@@ -40,7 +43,7 @@
 }
 
 /* Walls block movement */
-.row .cell:nth-child(odd).wall, .row:nth-child(odd) .cell.wall {
+.cell.wall {
   background-color: black;
 }
 

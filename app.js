@@ -1,5 +1,6 @@
 const SYMBOL_TABLE = {
   ' ': 'space',
+  'C': 'wall', // center tile (just a wall for now)
   '-': 'wall',
   '+': 'wall',
   '|': 'wall',
@@ -42,18 +43,18 @@ var Tile = function(string) {
    layout.push(row);
   });
 
-  // Check that input was valid
+  // Check that each row is the same length, and there are the
+  // same number of rows as columns.
   $.each(layout, function(n, row) {
     if (row.length != layout.length) {
       throw("Tile: Input string is now square");
     }
   });
+  self.size = layout.length;
 
   rotate = function(lay) {
-    rot_lay = [];
-    // Create 2d array rot_lay with same number of columns as lay
-    // FIXME: is this ok?
-    $.each(lay, function() { rot_lay.push([]) });
+    rot_lay = []; $.each(lay, function() { rot_lay.push([]) });
+
     $.each(layout.reverse(), function(n, row) {
       $.each(row, function(j, cell) {
         rot_lay[n].push(cell);
@@ -63,21 +64,83 @@ var Tile = function(string) {
     return rot_lay;
   }
 
-  self.NWlayout = layout
-  self.NElayout = rotate(self.NWlayout);
-  self.SElayout = rotate(self.NElayout);
-  self.SWlayout = rotate(self.SElayout);
+  self.NW = layout
+  self.NE = rotate(self.NW);
+  self.SE = rotate(self.NE);
+  self.SW = rotate(self.SE);
   return self;
 }
 
 // Made of four Tiles defined clockwise starting at NE tile
-var Board = function(NEtile, SEtile, SWtile, NWtile) {
+var Board = function(tile1, tile2, tile3, tile4) {
+  add_horizontal = function(left_layout, right_layout) {
+    layout = left_layout; // TODO: make sure layout is a copy, not a reference
+
+    // For each row
+    for (var i = 0; i < left_layout.length; i++) {
+      left = left_layout[i][left_layout.length-1]; // last cell of left layout
+      right = right_layout[i][0];                  // first cell of right layout
+
+      // If left or right column has a wall along the edge the center column
+      // of the combined layout should have a wall.
+      if (left == 'wall' || right == 'wall') {
+        layout[i][layout.length - 1] = 'wall';
+      }
+
+      // Merge left and right layout, droping the first column of the right layout
+      layout[i] = layout[i].concat(right_layout[i].slice(1))
+    }
+    return layout;
+  }
+
+  add_vericle = function(top_layout, bottom_layout) {
+    layout = top_layout; // TODO: make sure layout is a copy, not a reference
+
+    // For each column
+    for (var i = 0; i < top_layout.length; i++) {
+      bottom_cell = top_layout[top_layout.length - 1][i]; // i-th cell from bottom row of top layout
+      top_cell = bottom_layout[0][i];                     // i-th cell from top row of bottom layout
+
+      // If bottom or top row has a wall along the edge the center row
+      // of the combined layout should have a wall.
+      if (bottom_cell == 'wall' || top_cell == 'wall') {
+        layout[layout.length - 1][i] = 'wall';
+      }
+
+    }
+
+    // Merge top and bottom layout, droping the top row of the bottom layout
+    layout = layout.concat(bottom_layout.slice(1));
+
+    return layout;
+  }
+
   //-- Setup Code
   var self = this;
-  self.NEtile = NEtile;
-  self.SEtile = SEtile;
-  self.SWtile = SWtile;
-  self.NWtile = NWtile;
+
+  // Check that each tile is the same size.
+  if (tile1.size != tile2.size || tile1.size != tile3.size || tile1.size != tile4.size) {
+    throw "Board: All tiles must be the same size";
+  }
+
+  // Add tile 2 to the right of tile 1, merging the center columns
+  var top_layout = add_horizontal(tile1.NW, tile2.NE);
+
+
+  // Add tile 4 to the right of tile 2, merging the center columns
+  var bottom_layout = add_horizontal(tile3.SW, tile4.SE);
+
+  // Add the combined tiles 3,4 below tiles 1,2, merging the center rows
+  self.layout = add_vericle(top_layout, bottom_layout);
+
+  // Check that the layout is square, and each row has the same number of cells.
+  $.each(self.layout, function(n, row) {
+    if (row.length != self.layout.length) {
+      throw("Board: board is not square");
+    }
+  });
+
+  self.size = layout.length;
 
   return self;
 }
@@ -103,9 +166,9 @@ $(function (){
        "|                \n" +
        "+-               \n" +
        "|     |k         \n" +
-       "|     +-      +- \n" +
-       "|             |  \n" +
-       "|                "),
+       "|     +-      +-+\n" +
+       "|             |C|\n" +
+       "|             +-+"),
   a2: new Tile(
        "+----------------\n" +
        "|         |      \n" +
@@ -121,9 +184,9 @@ $(function (){
        "|            k|  \n" +
        "+-               \n" +
        "|     |a         \n" +
-       "|     +-      +- \n" +
-       "|             |  \n" +
-       "|                "),
+       "|     +-      +-+\n" +
+       "|             |C|\n" +
+       "|             +-+"),
   b1: new Tile(
        "+----------------\n" +
        "|       |        \n" +
@@ -139,9 +202,9 @@ $(function (){
        "|                \n" +
        "|    -+          \n" +
        "|    g|          \n" +
-       "|             +- \n" +
-       "|             |  \n" +
-       "|                "),
+       "|             +-+\n" +
+       "|             |C|\n" +
+       "|             +-+"),
   b2: new Tile(
        "+----------------\n" +
        "|         |      \n" +
@@ -157,9 +220,9 @@ $(function (){
        "|        i|      \n" +
        "|                \n" +
        "|  p|            \n" +
-       "|  -+         +- \n" +
-       "|             |  \n" +
-       "|                "),
+       "|  -+         +-+\n" +
+       "|             |C|\n" +
+       "|             +-+"),
   c1: new Tile(
        "+----------------\n" +
        "|       |        \n" +
@@ -175,9 +238,9 @@ $(function (){
        "|             |e \n" +
        "| +-          +- \n" +
        "| |j             \n" +
-       "|             +- \n" +
-       "|             |  \n" +
-       "|                "),
+       "|             +-+\n" +
+       "|             |C|\n" +
+       "|             +-+"),
   c2: new Tile(
        "+----------------\n" +
        "|       |        \n" +
@@ -193,9 +256,9 @@ $(function (){
        "|             |j \n" +
        "+-               \n" +
        "|                \n" +
-       "|             +- \n" +
-       "|             |  \n" +
-       "|                "),
+       "|             +-+\n" +
+       "|             |C|\n" +
+       "|             +-+"),
   d1: new Tile(
        "+----------------\n" +
        "|       |        \n" +
@@ -211,9 +274,9 @@ $(function (){
        "|    m|        r|\n" +
        "|    -+        -+\n" +
        "|                \n" +
-       "+-            +- \n" +
-       "|             |  \n" +
-       "                 "),
+       "+-            +-+\n" +
+       "|             |C|\n" +
+       "              +-+"),
   d2: new Tile(
        "+----------------\n" +
        "|         |      \n" +
@@ -229,18 +292,21 @@ $(function (){
        "|                \n" +
        "|          -+    \n" +
        "|          c|    \n" +
-       "|             +- \n" +
-       "|      r|     |  \n" +
-       "       -+        "
+       "|             +-+\n" +
+       "|      r|     |C|\n" +
+       "       -+     +-+"
      )
   }
 
-  $.each(tiles, function(n, tile) {
+  //board = new Board(tiles['a1'], tiles['b1'], tiles['c1'], tiles['d1']);
+  t_array = [tiles['a1'].NW, tiles['b1'].NE, tiles['c1'].SW, tiles['d1'].SE]
+  $.each(t_array, function(n, tile) {
+    // Draw the table
     table = $('<div>').attr('class', 'tile')
-    $.each(tile.NWlayout, function(n, row) {
+    $.each(tile, function(n, row) {
       table_row = $('<div>').attr('class', 'row')
 
-      // Each charecter
+      // Each cell
       $.each(row, function(n, type) {
         classes = 'cell ' + type
         cell = $('<div>').attr('class', classes)

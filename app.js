@@ -5,23 +5,23 @@ var SYMBOL_TABLE = {
   '-': 'wall',
   '+': 'wall',
   '|': 'wall',
-  'a': 'red moon',
-  'b': 'yellow moon',
-  'c': 'blue moon',
-  'd': 'green moon',
-  'e': 'red gear',
-  'f': 'yellow gear',
-  'g': 'blue gear',
-  'h': 'green gear',
-  'i': 'red saturn',
-  'j': 'yellow saturn',
-  'k': 'blue saturn',
-  'l': 'green saturn',
-  'm': 'red star',
-  'n': 'yellow star',
-  'o': 'blue star',
-  'p': 'green star',
-  'r': 'cosmic'
+  'a': 'space red moon',
+  'b': 'space yellow moon',
+  'c': 'space blue moon',
+  'd': 'space green moon',
+  'e': 'space red gear',
+  'f': 'space yellow gear',
+  'g': 'space blue gear',
+  'h': 'space green gear',
+  'i': 'space red saturn',
+  'j': 'space yellow saturn',
+  'k': 'space blue saturn',
+  'l': 'space green saturn',
+  'm': 'space red star',
+  'n': 'space yellow star',
+  'o': 'space blue star',
+  'p': 'space green star',
+  'r': 'space cosmic'
 };
 
 // Clones a 2d array
@@ -166,21 +166,21 @@ var Game = function(board) {
   var self = this;
 
   var unicode_symbols = {
-    star: '\u2605', // '★'
-    gear: '\u2699', // '⚙'
+    star:   '\u2605', // '★'
+    gear:   '\u2699', // '⚙'
     saturn: '\u229a', // '⊚'
-    moon: '\u263E', // '☾'
+    moon:   '\u263E', // '☾'
     cosmic: '\uAA5C', // '꩜'
-    robot: '\u2603', // '☃'
+    robot:  '\u2603', // '☃'
   }
 
   self.board = board;
 
   // robots x, y positions
   self.robots = {
-    red: {x: null, y: null},
-    green: {x: null, y: null},
-    blue: {x: null, y: null},
+    red:    {x: null, y: null},
+    green:  {x: null, y: null},
+    blue:   {x: null, y: null},
     yellow: {x: null, y: null},
   }
 
@@ -223,6 +223,7 @@ var Game = function(board) {
 
   var draw_robots = function (node) {
     $.each(self.robots, function(name, position) {
+      console.log(name, position);
       var robot = $('<span>')
           .text(unicode_symbols['robot'])
           .attr('class', 'robot ' + name)
@@ -230,7 +231,8 @@ var Game = function(board) {
           .attr('draggable', true);
 
       if (position.x != null && position.y != null) {
-        node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']')[0].append(robot);
+        console.log(node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']')[0]);
+        node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']').append(robot);
       } else {
         node.find('.sideboard').append(robot);
       }
@@ -239,33 +241,34 @@ var Game = function(board) {
 
   var add_event_listners = function(node) {
     node.find('.robot').bind('dragstart', function(e) {
-      console.log('robot dragstart');
       e = e.originalEvent;
       var color = $(this).attr('data-color');
 
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.dropEffect    = 'move';
       e.dataTransfer.setData('color', color);
     });
 
-    node.find('.robot').bind('drop', function(e) {
-      console.log('robot drop');
+    // Allow drop event.
+    node.find('.cell.space').bind('dragover', function(e) {
+      e.originalEvent.preventDefault();
+    });
+
+    node.find('.cell.space').bind('drop', function(e) {
       e = e.originalEvent;
       var elem = $(this);
       var color = e.dataTransfer.getData('color')
-      var position = {x: elem.attr('data-x-pos'), y: elem.attr('data-y-pos')};
-      console.log(elem, color, position);
-      self.robots[color] = position;
+      var position = {x: parseInt(elem.attr('data-x-pos')), y: parseInt(elem.attr('data-y-pos'))};
 
+      self.robots[color] = position;
+      console.log(self.robots);
       self.draw(node);
     });
 
-    node.find('.cell').bind('dragenter', function(e) {
-      console.log('cell dragenter');
+    node.find('.cell.space').bind('dragenter', function(e) {
       this.classList.add('over');
     });
-    node.find('.cell').bind('dragleave', function(e) {
-      console.log('cell dragleave');
+    node.find('.cell.space').bind('dragleave', function(e) {
       this.classList.remove('over');
     });
   }

@@ -23,31 +23,28 @@
   height: 30px;
   width:  30px;
   float: left;
-  color: white;
+  color: black;
 }
 
-.cell.over {
-  background-color: gray;
-}
 
-.board .red, .sideboard .red {
+.board .red {
   background-color: red;
 }
 
-.board .blue, .sideboard .blue {
+.board .blue {
   background-color: blue;
 }
 
-.board .green, .sideboard .green {
+.board .green {
   background-color: green;
 }
 
-.board .yellow, .sideboard .yellow {
+.board .yellow {
   background-color: yellow;
   color: black;
 }
 
-.board .cosmic, .sideboard .cosmic {
+.board .cosmic {
   background-color: orange;
 }
 
@@ -70,4 +67,8 @@
 /* Grid separators */
 .row:nth-child(odd) .cell:not(.wall), .row .cell:nth-child(odd):not(.wall) {
   background-color: lightgray;
+}
+
+.over {
+  background-color: gray;
 }

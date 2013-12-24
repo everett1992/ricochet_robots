@@ -226,6 +226,7 @@ var Game = function(board) {
       var robot = $('<span>')
           .text(unicode_symbols['robot'])
           .attr('class', 'robot ' + name)
+          .attr('data-color', name)
           .attr('draggable', true);
 
       if (position.x != null && position.y != null) {
@@ -237,16 +238,40 @@ var Game = function(board) {
   }
 
   var add_event_listners = function(node) {
+    node.find('.robot').bind('dragstart', function(e) {
+      console.log('robot dragstart');
+      e = e.originalEvent;
+      var color = $(this).attr('data-color');
+
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.setData('color', color);
+    });
+
+    node.find('.robot').bind('drop', function(e) {
+      console.log('robot drop');
+      e = e.originalEvent;
+      var elem = $(this);
+      var color = e.dataTransfer.getData('color')
+      var position = {x: elem.attr('data-x-pos'), y: elem.attr('data-y-pos')};
+      console.log(elem, color, position);
+      self.robots[color] = position;
+
+      self.draw(node);
+    });
+
     node.find('.cell').bind('dragenter', function(e) {
-      console.log('over');
+      console.log('cell dragenter');
       this.classList.add('over');
     });
     node.find('.cell').bind('dragleave', function(e) {
+      console.log('cell dragleave');
       this.classList.remove('over');
     });
   }
 
   self.draw = function(node) {
+    node.empty();
     draw_board(node);
     draw_robots(node);
     add_event_listners(node);

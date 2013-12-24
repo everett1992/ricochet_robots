@@ -1,74 +1,48 @@
-.board {
-  padding: 20px;
-}
-
 .clear {
-  clear: both;
-}
+  clear: both; }
 
-.sideboard {
+.table .robot {
+  cursor: move; }
+  .table .robot.red {
+    color: red; }
+  .table .robot.blue {
+    color: blue; }
+  .table .robot.green {
+    color: green; }
+  .table .robot.yellow {
+    color: yellow; }
+.table .board {
+  padding: 20px; }
+  .table .board .cell {
+    text-align: center;
+    font-size: 30px;
+    height: 30px;
+    width: 30px;
+    float: left;
+    color: black; }
+  .table .board .row:nth-child(odd) .cell {
+    height: 5px; }
+    .table .board .row:nth-child(odd) .cell:not(.wall) {
+      background-color: lightgray; }
+  .table .board .cell:nth-child(odd) {
+    width: 5px; }
+    .table .board .cell:nth-child(odd):not(.wall) {
+      background-color: lightgray; }
+  .table .board .wall {
+    background-color: black; }
+  .table .board .space.over {
+    background-color: gray !important; }
+  .table .board .space.red {
+    background-color: red; }
+  .table .board .space.blue {
+    background-color: blue; }
+  .table .board .space.green {
+    background-color: green; }
+  .table .board .space.yellow {
+    background-color: yellow; }
+  .table .board .space.cosmic {
+    background-color: orange; }
+.table .sideboard {
   text-align: center;
   font-size: 30px;
-  width:  30px;
-}
-
-.robot {
-  cursor: move;
-}
-
-/* Default cell is 20x20 */
-.cell {
-  text-align: center;
-  font-size: 30px;
-  height: 30px;
-  width:  30px;
-  float: left;
-  color: black;
-}
-
-
-.board .red {
-  background-color: red;
-}
-
-.board .blue {
-  background-color: blue;
-}
-
-.board .green {
-  background-color: green;
-}
-
-.board .yellow {
-  background-color: yellow;
-  color: black;
-}
-
-.board .cosmic {
-  background-color: orange;
-}
-
-/* Odd rows (1 indexed) are between spaces */
-.row:nth-child(odd) .cell {
-  height: 5px;
-}
-
-/* Odd columns (1 indexed) are between spaces */
-.cell:nth-child(odd) {
-  width: 5px;
-}
-
-/* Walls block movement */
-.cell.wall {
-  background-color: black;
-}
-
-
-/* Grid separators */
-.row:nth-child(odd) .cell:not(.wall), .row .cell:nth-child(odd):not(.wall) {
-  background-color: lightgray;
-}
-
-.over {
-  background-color: gray;
-}
+  width: 30px; }

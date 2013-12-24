@@ -1,27 +1,27 @@
 "use strict"
 var SYMBOL_TABLE = {
-  ' ': 'space',
+  ' ': '',
   'C': 'wall', // center tile (just a wall for now)
   '-': 'wall',
   '+': 'wall',
   '|': 'wall',
-  'a': 'space red moon',
-  'b': 'space yellow moon',
-  'c': 'space blue moon',
-  'd': 'space green moon',
-  'e': 'space red gear',
-  'f': 'space yellow gear',
-  'g': 'space blue gear',
-  'h': 'space green gear',
-  'i': 'space red saturn',
-  'j': 'space yellow saturn',
-  'k': 'space blue saturn',
-  'l': 'space green saturn',
-  'm': 'space red star',
-  'n': 'space yellow star',
-  'o': 'space blue star',
-  'p': 'space green star',
-  'r': 'space cosmic'
+  'a': 'red moon',
+  'b': 'yellow moon',
+  'c': 'blue moon',
+  'd': 'green moon',
+  'e': 'red gear',
+  'f': 'yellow gear',
+  'g': 'blue gear',
+  'h': 'green gear',
+  'i': 'red saturn',
+  'j': 'yellow saturn',
+  'k': 'blue saturn',
+  'l': 'green saturn',
+  'm': 'red star',
+  'n': 'yellow star',
+  'o': 'blue star',
+  'p': 'green star',
+  'r': 'cosmic'
 };
 
 // Clones a 2d array
@@ -189,7 +189,7 @@ var Game = function(board) {
 
   var draw_board = function(node) {
     // Draw the board
-    var table = $('<div>').attr('class', 'board');
+    var table = $('<div>').attr('class', 'table');
     var board = $('<div>').attr('class', 'board');
     table.append($('<div>').attr('class', 'sideboard'));
     table.append(board);
@@ -198,9 +198,14 @@ var Game = function(board) {
 
       // Each cell
       $.each(row, function(y, type) {
-        var classes = 'cell ' + type;
+
+        var classes = ['cell', type];
+        if (x % 2 != 0 && y % 2 != 0) {
+          classes.push('space');
+        }
+
         var cell = $('<div>')
-          .attr('class', classes)
+          .attr('class', classes.join(' '))
           .attr('data-x-pos', x)
           .attr('data-y-pos', y);
 
@@ -250,11 +255,11 @@ var Game = function(board) {
     });
 
     // Allow drop event.
-    node.find('.cell.space').bind('dragover', function(e) {
+    node.find('.space').bind('dragover', function(e) {
       e.originalEvent.preventDefault();
     });
 
-    node.find('.cell.space').bind('drop', function(e) {
+    node.find('.space').bind('drop', function(e) {
       e = e.originalEvent;
       var elem = $(this);
       var color = e.dataTransfer.getData('color')
@@ -265,10 +270,10 @@ var Game = function(board) {
       self.draw(node);
     });
 
-    node.find('.cell.space').bind('dragenter', function(e) {
+    node.find('.space').bind('dragenter', function(e) {
       this.classList.add('over');
     });
-    node.find('.cell.space').bind('dragleave', function(e) {
+    node.find('.space').bind('dragleave', function(e) {
       this.classList.remove('over');
     });
   }

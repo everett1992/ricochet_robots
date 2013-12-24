@@ -1,0 +1,58 @@
+$space-size: 30px;
+$wall-size: 5px;
+
+.clear {
+  clear: both;
+}
+
+.table {
+  .robot {
+    cursor: move;
+    &.red    { color: red;    }
+    &.blue   { color: blue;   }
+    &.green  { color: green;  }
+    &.yellow { color: yellow; }
+  }
+  .board {
+    padding: 20px;
+
+    .cell {
+      text-align: center;
+      font-size: 30px;
+      height: $space-size;
+      width:  $space-size;
+      float: left;
+      color: black;
+    }
+
+    // Odd rows (1 indexed) are between spaces
+    .row:nth-child(odd) .cell {
+      &:not(.wall) { background-color: lightgray; }
+      height: $wall-size;
+    }
+
+    // Odd columns (1 indexed) are between spaces
+    .cell:nth-child(odd) {
+      &:not(.wall) { background-color: lightgray; }
+      width: $wall-size;
+    }
+
+    .wall { background-color: black; }
+
+    .space {
+      &.over   { background-color: gray !important; }
+      &.red    { background-color: red;    }
+      &.blue   { background-color: blue;   }
+      &.green  { background-color: green;  }
+      &.yellow { background-color: yellow; }
+      &.cosmic { background-color: orange; }
+    }
+  }
+
+  .sideboard {
+    text-align: center;
+    font-size:  30px;
+    width:      30px;
+  }
+}
+

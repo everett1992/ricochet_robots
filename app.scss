@@ -41,11 +41,11 @@ $wall-size: 5px;
 
     .space {
       &.over   { background-color: gray !important; }
-      &.red    { background-color: red;    }
-      &.blue   { background-color: blue;   }
-      &.green  { background-color: green;  }
-      &.yellow { background-color: yellow; }
-      &.cosmic { background-color: orange; }
+      &[data-color=red]    { background-color: red;    }
+      &[data-color=blue]   { background-color: blue;   }
+      &[data-color=green]  { background-color: green;  }
+      &[data-color=yellow] { background-color: yellow; }
+      &[data-color=cosmic] { background-color: orange; }
     }
   }
 

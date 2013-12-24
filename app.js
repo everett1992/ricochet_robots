@@ -1,27 +1,27 @@
 "use strict"
 var SYMBOL_TABLE = {
-  ' ': '',
-  'C': 'wall', // center tile (just a wall for now)
-  '-': 'wall',
-  '+': 'wall',
-  '|': 'wall',
-  'a': 'red moon',
-  'b': 'yellow moon',
-  'c': 'blue moon',
-  'd': 'green moon',
-  'e': 'red gear',
-  'f': 'yellow gear',
-  'g': 'blue gear',
-  'h': 'green gear',
-  'i': 'red saturn',
-  'j': 'yellow saturn',
-  'k': 'blue saturn',
-  'l': 'green saturn',
-  'm': 'red star',
-  'n': 'yellow star',
-  'o': 'blue star',
-  'p': 'green star',
-  'r': 'cosmic'
+  ' ': {type: null,     color: null,     symbol: null},
+  'C': {type: 'wall',   color: null,     symbol: null},
+  '-': {type: 'wall',   color: null,     symbol: null},
+  '+': {type: 'wall',   color: null,     symbol: null},
+  '|': {type: 'wall',   color: null,     symbol: null},
+  'a': {type: 'target', color: 'red',    symbol: 'moon'},
+  'b': {type: 'target', color: 'yellow', symbol: 'moon'},
+  'c': {type: 'target', color: 'blue',   symbol: 'moon'},
+  'd': {type: 'target', color: 'green',  symbol: 'moon'},
+  'e': {type: 'target', color: 'red',    symbol: 'gear'},
+  'f': {type: 'target', color: 'yellow', symbol: 'gear'},
+  'g': {type: 'target', color: 'blue',   symbol: 'gear'},
+  'h': {type: 'target', color: 'green',  symbol: 'gear'},
+  'i': {type: 'target', color: 'red',    symbol: 'saturn'},
+  'j': {type: 'target', color: 'yellow', symbol: 'saturn'},
+  'k': {type: 'target', color: 'blue',   symbol: 'saturn'},
+  'l': {type: 'target', color: 'green',  symbol: 'saturn'},
+  'm': {type: 'target', color: 'red',    symbol: 'star'},
+  'n': {type: 'target', color: 'yellow', symbol: 'star'},
+  'o': {type: 'target', color: 'blue',   symbol: 'star'},
+  'p': {type: 'target', color: 'green',  symbol: 'star'},
+  'r': {type: 'target', color: 'cosmic', symbol: 'cosmic'}
 };
 
 // Clones a 2d array
@@ -162,7 +162,7 @@ var Board = function(tile1, tile2, tile3, tile4) {
   return self;
 }
 
-var Game = function(board) {
+var Game = function(board, node) {
   var self = this;
 
   var unicode_symbols = {
@@ -185,9 +185,9 @@ var Game = function(board) {
   }
 
   // target space x, y
-  self.target = {x: null, y: null};
+  self.target = null;
 
-  var draw_board = function(node) {
+  var draw_board = function() {
     // Draw the board
     var table = $('<div>').attr('class', 'table');
     var board = $('<div>').attr('class', 'board');
@@ -197,25 +197,27 @@ var Game = function(board) {
       var table_row = $('<div>').attr('class', 'row')
 
       // Each cell
-      $.each(row, function(y, type) {
+      $.each(row, function(y, elem) {
 
-        var classes = ['cell', type];
-        if (x % 2 != 0 && y % 2 != 0) {
-          classes.push('space');
+        var cell = $('<div>') .attr('data-x-pos', x) .attr('data-y-pos', y);
+
+        // Each div is a cell,
+        var classes = ['cell'];
+        // Each cell has the class of it's elem's type
+        if (elem.type != null) { classes.push(elem.type) }
+        // Odd columned and rowed cells are spaces
+        if (x % 2 != 0 && y % 2 != 0) { classes.push('space'); }
+        cell.attr('class', classes.join(' '))
+
+        // Add the symbol to the cell
+        if (elem.symbol != null) {
+          cell.attr('data-symbol', elem.symbol);
+          cell.text(unicode_symbols[elem.symbol]);
         }
 
-        var cell = $('<div>')
-          .attr('class', classes.join(' '))
-          .attr('data-x-pos', x)
-          .attr('data-y-pos', y);
-
-        if (type == undefined)
-          cell.text('undefined');
-
-        var symbol = type.match(/(star|saturn|moon|gear|cosmic)/);
-        if (symbol != null && symbol != undefined) {
-          symbol = symbol[0]; // get matched symbol
-          cell.text(unicode_symbols[symbol]);
+        // Add the color to the cell
+        if (elem.color != null) {
+          cell.attr('data-color', elem.color);
         }
 
         table_row.append(cell);
@@ -226,9 +228,8 @@ var Game = function(board) {
     node.append(table);
   }
 
-  var draw_robots = function (node) {
+  var draw_robots = function() {
     $.each(self.robots, function(name, position) {
-      console.log(name, position);
       var robot = $('<span>')
           .text(unicode_symbols['robot'])
           .attr('class', 'robot ' + name)
@@ -236,7 +237,6 @@ var Game = function(board) {
           .attr('draggable', true);
 
       if (position.x != null && position.y != null) {
-        console.log(node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']')[0]);
         node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']').append(robot);
       } else {
         node.find('.sideboard').append(robot);
@@ -244,7 +244,7 @@ var Game = function(board) {
     });
   }
 
-  var add_event_listners = function(node) {
+  var add_event_listners = function() {
     node.find('.robot').bind('dragstart', function(e) {
       e = e.originalEvent;
       var color = $(this).attr('data-color');
@@ -263,11 +263,10 @@ var Game = function(board) {
       e = e.originalEvent;
       var elem = $(this);
       var color = e.dataTransfer.getData('color')
-      var position = {x: parseInt(elem.attr('data-x-pos')), y: parseInt(elem.attr('data-y-pos'))};
+      var position = {x: parseInt(elem.data('x-pos')), y: parseInt(elem.data('y-pos'))};
 
       self.robots[color] = position;
-      console.log(self.robots);
-      self.draw(node);
+      self.update();
     });
 
     node.find('.space').bind('dragenter', function(e) {
@@ -276,14 +275,29 @@ var Game = function(board) {
     node.find('.space').bind('dragleave', function(e) {
       this.classList.remove('over');
     });
+
+    node.find('.target').bind('click', function(e) {
+      var elem = $(this);
+      var position = {x: parseInt(elem.data('x-pos')), y: parseInt(elem.data('y-pos'))};
+      var color = elem.data('color');
+      var symbol = elem.data('symbol');
+      self.target = {position: position, color: color, symbol: symbol};
+      self.update();
+    });
   }
 
-  self.draw = function(node) {
-    node.empty();
-    draw_board(node);
-    draw_robots(node);
-    add_event_listners(node);
+  self.update = function() {
+    self.draw();
   }
+
+  self.draw = function() {
+    node.empty();
+    draw_board();
+    draw_robots();
+    add_event_listners();
+  }
+
+  self.update();
   return self;
 }
 
@@ -441,6 +455,5 @@ $(function (){
   }
 
   var board = new Board(tiles['a1'], tiles['b1'], tiles['c1'], tiles['d1']);
-  var game = new Game(board);
-  game.draw($('body'));
+  var game = new Game(board, $('body'));
 });

@@ -53,6 +53,13 @@ $wall-size: 5px;
     text-align: center;
     font-size:  30px;
     width:      30px;
+    .target {
+      &[data-color=red]    { background-color: red;    }
+      &[data-color=blue]   { background-color: blue;   }
+      &[data-color=green]  { background-color: green;  }
+      &[data-color=yellow] { background-color: yellow; }
+      &[data-color=cosmic] { background-color: orange; }
+    }
   }
 }
 

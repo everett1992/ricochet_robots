@@ -228,6 +228,16 @@ var Game = function(board, node) {
     node.append(table);
   }
 
+  var draw_target = function() {
+    if (self.target != null) {
+      var target = $('<span>')
+        .text(unicode_symbols[self.target.symbol])
+        .attr('class', 'target')
+        .attr('data-color', self.target.color)
+      node.find('.sideboard').append(target);
+    }
+  }
+
   var draw_robots = function() {
     $.each(self.robots, function(name, position) {
       var robot = $('<span>')
@@ -294,6 +304,7 @@ var Game = function(board, node) {
     node.empty();
     draw_board();
     draw_robots();
+    draw_target();
     add_event_listners();
   }
 

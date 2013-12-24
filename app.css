@@ -46,3 +46,13 @@
   text-align: center;
   font-size: 30px;
   width: 30px; }
+  .table .sideboard .target[data-color=red] {
+    background-color: red; }
+  .table .sideboard .target[data-color=blue] {
+    background-color: blue; }
+  .table .sideboard .target[data-color=green] {
+    background-color: green; }
+  .table .sideboard .target[data-color=yellow] {
+    background-color: yellow; }
+  .table .sideboard .target[data-color=cosmic] {
+    background-color: orange; }

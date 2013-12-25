@@ -1,58 +1,59 @@
 .clear {
   clear: both; }
 
-.table .robot {
-  cursor: move; }
-  .table .robot.red {
-    color: red; }
-  .table .robot.blue {
-    color: blue; }
-  .table .robot.green {
-    color: green; }
-  .table .robot.yellow {
-    color: yellow; }
-.table .board {
-  padding: 20px; }
-  .table .board .cell {
+.table {
+  font-size: 30px; }
+  .table .robot {
+    cursor: move; }
+    .table .robot.red {
+      color: red; }
+    .table .robot.blue {
+      color: blue; }
+    .table .robot.green {
+      color: green; }
+    .table .robot.yellow {
+      color: yellow; }
+  .table .board {
+    padding: 20px; }
+    .table .board .cell {
+      text-align: center;
+      height: 30px;
+      width: 30px;
+      float: left;
+      color: black; }
+    .table .board .row:nth-child(odd) .cell {
+      height: 5px; }
+      .table .board .row:nth-child(odd) .cell:not(.wall) {
+        background-color: lightgray; }
+    .table .board .cell:nth-child(odd) {
+      width: 5px; }
+      .table .board .cell:nth-child(odd):not(.wall) {
+        background-color: lightgray; }
+    .table .board .wall {
+      background-color: black; }
+    .table .board .space.over {
+      background-color: gray !important; }
+    .table .board .space[data-color=red] {
+      background-color: red; }
+    .table .board .space[data-color=blue] {
+      background-color: blue; }
+    .table .board .space[data-color=green] {
+      background-color: green; }
+    .table .board .space[data-color=yellow] {
+      background-color: yellow; }
+    .table .board .space[data-color=cosmic] {
+      background-color: orange; }
+  .table .sideboard {
     text-align: center;
     font-size: 30px;
-    height: 30px;
-    width: 30px;
-    float: left;
-    color: black; }
-  .table .board .row:nth-child(odd) .cell {
-    height: 5px; }
-    .table .board .row:nth-child(odd) .cell:not(.wall) {
-      background-color: lightgray; }
-  .table .board .cell:nth-child(odd) {
-    width: 5px; }
-    .table .board .cell:nth-child(odd):not(.wall) {
-      background-color: lightgray; }
-  .table .board .wall {
-    background-color: black; }
-  .table .board .space.over {
-    background-color: gray !important; }
-  .table .board .space[data-color=red] {
-    background-color: red; }
-  .table .board .space[data-color=blue] {
-    background-color: blue; }
-  .table .board .space[data-color=green] {
-    background-color: green; }
-  .table .board .space[data-color=yellow] {
-    background-color: yellow; }
-  .table .board .space[data-color=cosmic] {
-    background-color: orange; }
-.table .sideboard {
-  text-align: center;
-  font-size: 30px;
-  width: 30px; }
-  .table .sideboard .target[data-color=red] {
-    background-color: red; }
-  .table .sideboard .target[data-color=blue] {
-    background-color: blue; }
-  .table .sideboard .target[data-color=green] {
-    background-color: green; }
-  .table .sideboard .target[data-color=yellow] {
-    background-color: yellow; }
-  .table .sideboard .target[data-color=cosmic] {
-    background-color: orange; }
+    width: 30px; }
+    .table .sideboard .target[data-color=red] {
+      background-color: red; }
+    .table .sideboard .target[data-color=blue] {
+      background-color: blue; }
+    .table .sideboard .target[data-color=green] {
+      background-color: green; }
+    .table .sideboard .target[data-color=yellow] {
+      background-color: yellow; }
+    .table .sideboard .target[data-color=cosmic] {
+      background-color: orange; }

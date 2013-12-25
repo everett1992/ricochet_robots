@@ -25,7 +25,7 @@ var SYMBOL_TABLE = {
 };
 
 // Clones a 2d array
-var clone = function(arr2d) {
+var clone_array = function(arr2d) {
   var copy_arr = [];
 
   $.each(arr2d, function(n, row) {  // For each row
@@ -81,7 +81,7 @@ var Tile = function(string) {
     return rotated;
   }
 
-  self.NW = clone(layout);
+  self.NW = clone_array(layout);
   self.NE = rotate(self.NW);
   self.SE = rotate(self.NE);
   self.SW = rotate(self.SE);
@@ -91,7 +91,7 @@ var Tile = function(string) {
 // Made of four Tiles defined clockwise starting at NE tile
 var Board = function(tile1, tile2, tile3, tile4) {
   var add_horizontal = function(left_layout, right_layout) {
-    var layout = clone(left_layout); // TODO: make sure layout is a copy, not a reference
+    var layout = clone_array(left_layout); // TODO: make sure layout is a copy, not a reference
 
     // For each row
     for (var i = 0; i < left_layout.length; i++) {
@@ -111,7 +111,7 @@ var Board = function(tile1, tile2, tile3, tile4) {
   }
 
   var add_vericle = function(top_layout, bottom_layout) {
-    var layout = clone(top_layout); // TODO: make sure layout is a copy, not a reference
+    var layout = clone_array(top_layout); // TODO: make sure layout is a copy, not a reference
 
     // For each column
     for (var i = 0; i < top_layout.length; i++) {
@@ -162,6 +162,92 @@ var Board = function(tile1, tile2, tile3, tile4) {
   return self;
 }
 
+// The board is not saved to the State to save
+// space when traversing the moves tree.
+var State = function(robots) {
+  var self = this;
+
+  // Copy the set of robots.
+  self.robots = {};
+  $.each(robots, function(name, p) {
+    self.robots[name] = {x: p.x, y: p.y};
+  });
+
+  // return a hash uniquely (sp?) identifying this game state
+  var hash_arr = [];
+  $.each(self.robots, function(n, r) {
+    hash_arr.push(r.x, r.y);
+  });
+  self.hash = hash_arr.join('|');
+
+  // is the space in the passed direction a legal move?
+  var valid = function(board, robot, direction) {
+    var x = robot.x; var y = robot.y;
+
+    // TODO: change this to a switch statement
+    var inc = function() {
+      if      (direction == 'up')    { y--; }
+      else if (direction == 'down')  { y++; }
+      else if (direction == 'right') { x++; }
+      else if (direction == 'left')  { x--; }
+      else { throw "direction must be one of up, down, left, right, got " + direction; }
+    }
+
+    inc();
+    // Check there is no wall between here and the next space
+    if ((board[y] == null) ||         // row doesn't exist
+        (board[y][x] == null) ||      // column doesn't exist
+        (board[y][x].type == 'wall')) // space is a wall
+    { return false; }
+
+    inc();
+    // Check that the next space isn't occupied
+    if ((board[y] == null) ||  // row doesn't exist
+        (board[y][x] == null)) // column doesn't exist
+    { return false; }
+
+    var blocked = false;
+    $.each(self.robots, function(name, o) { // space isn't occupied by another robot
+      if (o.x == x && o.y == y) { blocked = true; }
+    });
+    if (blocked == true) { return false; }
+
+    // If all the other tests failed the move is valid
+    return true;
+  }
+
+  // Returns an array of States that can be reached from here.
+  self.moves = function(board) {
+    var moves = []; // Array of states
+
+    $.each(self.robots, function(name, robot) {
+      $.each(['up', 'down', 'left', 'right'], function(n, direction) {
+        var moved_robot = { x: robot.x, y: robot.y };
+        while (valid(board, moved_robot, direction)) {
+          if      (direction == 'up')    { moved_robot.y -= 2 }
+          else if (direction == 'down')  { moved_robot.y += 2 }
+          else if (direction == 'right') { moved_robot.x += 2 }
+          else if (direction == 'left')  { moved_robot.x -= 2 }
+          else { throw "direction must be one of up, down, left, right, got " + direction; }
+        }
+
+        // If the robot was moved at all copy create a new state with that move
+        if (moved_robot.x != robot.x || moved_robot.y != robot.y) {
+          console.log(name, direction, [robot.x, robot.y].join(','), [moved_robot.x, moved_robot.y].join(','));
+          // Copy  robots
+          var move = {};
+          $.each(self.robots, function(n, p) {
+            move[n] = {x: p.x, y: p.y};
+          });
+          move[name] = {x: moved_robot.x, y: moved_robot.y};
+          moves.push(new State(move))
+        }
+      });
+    });
+    return moves;
+  }
+}
+
 var Game = function(board, node) {
   var self = this;
 
@@ -176,16 +262,16 @@ var Game = function(board, node) {
 
   self.board = board;
 
+  self.target = null;
+
   // robots x, y positions
   self.robots = {
-    red:    {x: null, y: null},
-    green:  {x: null, y: null},
-    blue:   {x: null, y: null},
-    yellow: {x: null, y: null},
+    red:    null,
+    green:  null,
+    blue:   null,
+    yellow: null,
   }
 
-  // target space x, y
-  self.target = null;
 
   var draw_board = function() {
     // Draw the board
@@ -193,11 +279,11 @@ var Game = function(board, node) {
     var board = $('<div>').attr('class', 'board');
     table.append($('<div>').attr('class', 'sideboard'));
     table.append(board);
-    $.each(self.board.layout, function(x, row) {
+    $.each(self.board.layout, function(y, row) {
       var table_row = $('<div>').attr('class', 'row')
 
       // Each cell
-      $.each(row, function(y, elem) {
+      $.each(row, function(x, elem) {
 
         var cell = $('<div>') .attr('data-x-pos', x) .attr('data-y-pos', y);
 
@@ -246,7 +332,7 @@ var Game = function(board, node) {
           .attr('data-color', name)
           .attr('draggable', true);
 
-      if (position.x != null && position.y != null) {
+      if (position != null && position.x != null && position.y != null) {
         node.find('.board [data-x-pos=' + position.x + '][data-y-pos=' + position.y + ']').append(robot);
       } else {
         node.find('.sideboard').append(robot);
@@ -296,16 +382,56 @@ var Game = function(board, node) {
     });
   }
 
-  self.update = function() {
-    self.draw();
-  }
-
   self.draw = function() {
     node.empty();
     draw_board();
     draw_robots();
     draw_target();
     add_event_listners();
+  }
+
+  var count_moves = function() {
+    console.log('counting moves');
+
+    // returns true if the correct robot is in the target position.
+    var complete;
+    if (self.target.color == 'cosmic') {
+      // Any robot can complete the cosmic targets.
+      complete = function(state) {
+        var comp = false;
+        $.each(state.robots, function(robot) {
+          if (robot.x == self.target.position.x && robot.y == self.target.position.y) {
+            var comp = true
+          }
+        });
+        return comp;
+      }
+    } else {
+      // Colored robots can complete colored targets.
+      complete = function(state) {
+        var robot = state.robots[self.target.color]
+        return (robot.x == self.target.position.x && robot.y == self.target.position.y)
+      }
+    }
+
+    var state = new State(self.robots);
+    var moves = state.moves(self.board.layout);
+    console.log(moves);
+  }
+
+  self.update = function() {
+    // TODO: Change this to a 'any' method
+    var all_placed = true;
+    $.each(self.robots, function(n, robot) {
+      if (robot == null) { all_placed = false; }
+    });
+
+    // If all robots are placed and a target is selcted count
+    // the number of moves the puzzle can be completed in.
+    if (all_placed && self.target != null) {
+      count_moves();
+    }
+    self.draw();
   }
 
   self.update();

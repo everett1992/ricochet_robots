@@ -164,8 +164,12 @@ var Board = function(tile1, tile2, tile3, tile4) {
 
 // The board is not saved to the State to save
 // space when traversing the moves tree.
-var State = function(robots) {
+var State = function(robots, num_moves) {
   var self = this;
+
+  if (num_moves == null) { num_moves = 0 }
+
+  self.num_moves = num_moves
 
   // Copy the set of robots.
   self.robots = {};
@@ -233,14 +237,13 @@ var State = function(robots) {
 
         // If the robot was moved at all copy create a new state with that move
         if (moved_robot.x != robot.x || moved_robot.y != robot.y) {
-          console.log(name, direction, [robot.x, robot.y].join(','), [moved_robot.x, moved_robot.y].join(','));
           // Copy  robots
           var move = {};
           $.each(self.robots, function(n, p) {
             move[n] = {x: p.x, y: p.y};
           });
           move[name] = {x: moved_robot.x, y: moved_robot.y};
-          moves.push(new State(move))
+          moves.push(new State(move, self.num_moves + 1))
         }
       });
     });
@@ -414,12 +417,35 @@ var Game = function(board, node) {
       }
     }
 
-    var state = new State(self.robots);
-    var moves = state.moves(self.board.layout);
-    console.log(moves);
+    var first = new State(self.robots);
+    var queue = [new State(self.robots, 0)];
+    var visited = [];
+
+    while (queue.length > 0) {
+      var next = queue.shift();
+      console.log(next.num_moves);
+
+      // Check if the puzzle is complete.
+      if (complete(next)) {
+        console.log('complete');
+        return next.num_moves;
+      }
+
+      // Mark this state as visited.
+      visited.push(next.hash);
+
+      // Add unvisted moves to the queue.
+      var is_visited = function(state) {
+        return _.contains(state.hash);
+      }
+      var unvisted_moves = _.reject(next.moves(self.board.layout), is_visited);
+      queue = queue.concat(unvisted_moves);
+    }
+    throw "Exited loop without completing puzzle";
   }
 
   self.update = function() {
+    self.draw();
     // TODO: Change this to a 'any' method
     var all_placed = true;
     $.each(self.robots, function(n, robot) {
@@ -429,9 +455,9 @@ var Game = function(board, node) {
     // If all robots are placed and a target is selcted count
     // the number of moves the puzzle can be completed in.
     if (all_placed && self.target != null) {
-      count_moves();
+      var moves = count_moves();
+      console.log(moves);
     }
-    self.draw();
   }
 
   self.update();

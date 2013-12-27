@@ -398,7 +398,7 @@ var Game = function(board, node) {
       // Any robot can complete the cosmic targets.
       complete = function(state) {
         var comp = false;
-        $.each(state.robots, function(robot) {
+        $.each(state.robots, function(n, robot) {
           if (robot.x == self.target.position.x && robot.y == self.target.position.y) {
             var comp = true
           }
@@ -420,6 +420,19 @@ var Game = function(board, node) {
     var visited = {};
 
     while (next_queue.length > 0 || queue.length > 0) {
+      // Calculate weight of a move by adding the x and y distances of each robot to the target.
+      var weight = function(state) {
+        var sum = 0;
+        _.each(state.robots, function(robot) {
+          sum += Math.abs(robot.x - self.target.position.x);
+          sum += Math.abs(robot.y - self.target.position.y);
+        });
+        return sum;
+      }
+
+      // sort queue by weight
+      queue = _.sortBy(queue, weight)
+
       while (queue.length > 0) {
         var next = queue.shift();
         console.log(num_moves);

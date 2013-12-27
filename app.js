@@ -419,7 +419,7 @@ var Game = function(board, node) {
 
     var first = new State(self.robots);
     var queue = [new State(self.robots, 0)];
-    var visited = [];
+    var visited = {};
 
     while (queue.length > 0) {
       var next = queue.shift();
@@ -432,11 +432,11 @@ var Game = function(board, node) {
       }
 
       // Mark this state as visited.
-      visited.push(next.hash);
+      visited[next.hash] = true;
 
       // Add unvisted moves to the queue.
       var is_visited = function(state) {
-        return _.contains(state.hash);
+        return visited[state.hash] == true;
       }
       var unvisted_moves = _.reject(next.moves(self.board.layout), is_visited);
       queue = queue.concat(unvisted_moves);

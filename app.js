@@ -164,12 +164,8 @@ var Board = function(tile1, tile2, tile3, tile4) {
 
 // The board is not saved to the State to save
 // space when traversing the moves tree.
-var State = function(robots, num_moves) {
+var State = function(robots) {
   var self = this;
-
-  if (num_moves == null) { num_moves = 0 }
-
-  self.num_moves = num_moves
 
   // Copy the set of robots.
   self.robots = {};
@@ -243,7 +239,7 @@ var State = function(robots, num_moves) {
             move[n] = {x: p.x, y: p.y};
           });
           move[name] = {x: moved_robot.x, y: moved_robot.y};
-          moves.push(new State(move, self.num_moves + 1))
+          moves.push(new State(move))
         }
       });
     });
@@ -418,28 +414,36 @@ var Game = function(board, node) {
     }
 
     var first = new State(self.robots);
-    var queue = [new State(self.robots, 0)];
+    var queue = [new State(self.robots)];
+    var next_queue = [];
+    var num_moves = 0;
     var visited = {};
 
-    while (queue.length > 0) {
-      var next = queue.shift();
-      console.log(next.num_moves);
+    while (next_queue.length > 0 || queue.length > 0) {
+      while (queue.length > 0) {
+        var next = queue.shift();
+        console.log(num_moves);
 
-      // Check if the puzzle is complete.
-      if (complete(next)) {
-        console.log('complete');
-        return next.num_moves;
+        // Check if the puzzle is complete.
+        if (complete(next)) {
+          console.log('complete');
+          return num_moves;
+        }
+
+        // Mark this state as visited.
+        visited[next.hash] = true;
+
+        // Add unvisted moves to the queue.
+        var is_visited = function(state) {
+          return visited[state.hash] == true;
+        }
+        var unvisted_moves = _.reject(next.moves(self.board.layout), is_visited);
+
+        next_queue = next_queue.concat(unvisted_moves);
       }
-
-      // Mark this state as visited.
-      visited[next.hash] = true;
-
-      // Add unvisted moves to the queue.
-      var is_visited = function(state) {
-        return visited[state.hash] == true;
-      }
-      var unvisted_moves = _.reject(next.moves(self.board.layout), is_visited);
-      queue = queue.concat(unvisted_moves);
+      queue = next_queue;
+      next_queue = [];
+      num_moves += 1;
     }
     throw "Exited loop without completing puzzle";
   }

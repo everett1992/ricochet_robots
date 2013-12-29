@@ -1,42 +1,34 @@
+# Ricochet Robots
+
+Uses bredth first search to find the least number of moves a ricochet robots
+puzzle can be solved in.
+
+Bredth first search will examine all one move solutions before any two move
+solutions, and all two move solutions before any three move solutions.
+The number of possible moves to examine increases exponentially as the
+number of moves increases.
+
+BFS will find with certianty the shortest solution, but it will take too
+long.
+I need to find an algorithm that finds probable solutions and rates them
+on confidince.
+
+
 # symbols
 
 There are 377,993,952,000 unique board positions
 96 boards, 252 spaces, 4 robots. (96 * 252 * 251 * 250 * 249)
 93,742,500,096,000 with the silver robot. (above * 248)
 
-- [ ] Draw target symbols
+- [x] Draw target symbols
 - [ ] Select board segments and sides
-- [ ] Place Robots
-- [ ] Select target
-- [ ] Calculate moves
-- [ ] Calculate the most moves it could take to solve a situation
+- [x] Place Robots
+- [x] Select target
+- [x] Calculate moves
+- [ ] Calculate the most moves it could take to solve any situation
+- [ ] Draw the moves that can be used to complete the puzzle.
 
 - [ ] Replace rotation code with lin alg
-
-a  red moon
-b  yellow moon
-c  blue moon
-d  green moon
-
-e  red gear
-f  yellow gear
-g  blue gear
-h  green gear
-
-i  red saturn
-j yellow saturn
-k blue saturn
-l green saturn
-
-m red star
-n yellow star
-o blue star
-p green star
-
-r cosmic
-
-   012
-0 |123|741|987
-1 |456|852|654
-2 |789|963|321
-   ---+---+---
+- [ ] Try likely n + 1 move solutions before trying all n move solutions
+- [ ] Replace $.each with _.each
+- [ ] Clean up code using lodash
